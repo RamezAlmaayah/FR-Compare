@@ -1,4 +1,4 @@
-import { getImageUrl } from '../api/apiConfig';
+import PrivateImage from './PrivateImage';
 
 const SupplierImage = ({ imagePath, supplierName, className = '' }) => {
   if (!imagePath) {
@@ -6,9 +6,9 @@ const SupplierImage = ({ imagePath, supplierName, className = '' }) => {
   }
 
   return (
-    <img
+    <PrivateImage
       className={className}
-      src={getImageUrl(imagePath)}
+      imagePath={imagePath}
       alt={`${supplierName} logo`}
     />
   );

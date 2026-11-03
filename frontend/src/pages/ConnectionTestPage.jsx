@@ -13,11 +13,11 @@ const ConnectionTestPage = () => {
   useEffect(() => {
     const checkApiConnection = async () => {
       try {
-        const response = await apiClient.get('/test');
+        const response = await apiClient.get('/health');
 
         setApiState({
           status: 'connected',
-          message: response.data.message,
+          message: response.data.status === 'ok' ? 'The API is healthy.' : 'The API is unavailable.',
         });
       } catch {
         setApiState({

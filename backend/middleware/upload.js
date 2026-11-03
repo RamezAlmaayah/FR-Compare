@@ -1,41 +1,37 @@
-import { randomUUID } from 'crypto';
-import { mkdirSync } from 'fs';
-import { dirname, extname, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { randomUUID } from 'node:crypto';
+import { extname } from 'node:path';
 import multer from 'multer';
+import { storeUploadedFile, uploadsDirectory } from '../services/uploadStorage.js';
 
-const currentDirectory = dirname(fileURLToPath(import.meta.url));
-const uploadsDirectory = resolve(currentDirectory, '../uploads');
-
-mkdirSync(uploadsDirectory, { recursive: true });
-
-const allowedImageTypes = {
-  'image/jpeg': ['.jpg', '.jpeg'],
-  'image/png': ['.png'],
-};
-
-const storage = multer.diskStorage({
-  destination: uploadsDirectory,
-  filename: (_request, file, callback) => {
-    const safeExtension = file.mimetype === 'image/png' ? '.png' : '.jpg';
-    callback(null, `${randomUUID()}${safeExtension}`);
-  },
+const allowedImageTypes = { 'image/jpeg': ['.jpg', '.jpeg'], 'image/png': ['.png'] };
+const invalidImage = () => Object.assign(new Error('Only valid JPG, JPEG, and PNG images are allowed'), { status: 400 });
+const parser = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024, files: 1, fields: 30, fieldSize: 1024 * 1024, parts: 31 },
+  fileFilter: (_request, file, callback) => callback(
+    allowedImageTypes[file.mimetype]?.includes(extname(file.originalname).toLowerCase()) ? null : invalidImage(), true,
+  ),
 });
 
-const imageFileFilter = (_request, file, callback) => {
-  const fileExtension = extname(file.originalname).toLowerCase();
-  const allowedExtensions = allowedImageTypes[file.mimetype];
-
-  if (!allowedExtensions?.includes(fileExtension)) {
-    const error = new Error('Only JPG, JPEG, and PNG images are allowed');
-    error.status = 400;
-    return callback(error);
-  }
-
-  return callback(null, true);
+const upload = {
+  single: (field) => (request, response, next) => {
+    parser.single(field)(request, response, async (error) => {
+      if (error) return next(error);
+      const file = request.file;
+      if (!file) return next();
+      const valid = file.mimetype === 'image/png'
+        ? file.buffer.subarray(0, 8).equals(Buffer.from('89504e470d0a1a0a', 'hex'))
+        : file.buffer.subarray(0, 3).equals(Buffer.from('ffd8ff', 'hex'));
+      if (!valid) { request.file = undefined; return next(invalidImage()); }
+      file.filename = `${randomUUID()}${file.mimetype === 'image/png' ? '.png' : '.jpg'}`;
+      try {
+        await storeUploadedFile(file, request.userId);
+        delete file.buffer;
+        return next();
+      } catch (storageError) { request.file = undefined; return next(storageError); }
+    });
+  },
 };
-
-const upload = multer({ storage, fileFilter: imageFileFilter });
 
 export { uploadsDirectory };
 export default upload;

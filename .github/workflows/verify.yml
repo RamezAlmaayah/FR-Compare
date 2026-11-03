@@ -1,0 +1,46 @@
+name: Verify FR Compare
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:8
+        ports: ["27017:27017"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+      - run: npm ci
+        working-directory: backend
+      - run: npm test
+        working-directory: backend
+      - run: node scripts/verify-local.js
+        working-directory: backend
+      - run: npm audit --omit=dev
+        working-directory: backend
+      - run: npm ci
+        working-directory: frontend
+      - run: npm test
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+        env:
+          # Compilation check only. Netlify must build with the verified live API URL.
+          VITE_SERVER: https://api.example.invalid/api
+      - run: test "$(cat dist/_redirects)" = "/* /index.html 200"
+        working-directory: frontend
+      - run: npm audit --omit=dev
+        working-directory: frontend

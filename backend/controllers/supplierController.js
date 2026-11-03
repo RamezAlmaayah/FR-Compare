@@ -156,10 +156,13 @@ const updateSupplier = async (request, response) => {
       .json({ error: validationError || 'Supplier not found' });
   }
 
-  const supplier = await Supplier.findOne({
-    _id: request.params.id,
-    userId: request.userId,
-  });
+  let supplier;
+  try {
+    supplier = await Supplier.findOne({ _id: request.params.id, userId: request.userId });
+  } catch (error) {
+    await removeNewUpload(request.file);
+    throw error;
+  }
 
   if (!supplier) {
     await removeNewUpload(request.file);

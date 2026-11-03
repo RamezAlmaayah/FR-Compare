@@ -212,7 +212,7 @@ try {
     const response = await fetch(`${api}/suppliers`, { method: 'POST', headers: { Authorization: `Bearer ${tokenA}` }, body: form });
     assert.equal(response.status, 201);
     const { supplier } = await response.json();
-    assert.equal((await fetch(`${api.replace('/api', '')}${supplier.image}`)).status, 200);
+    assert.equal((await fetch(`${api.replace('/api', '')}${supplier.image}`, { headers: { Authorization: `Bearer ${tokenA}` } })).status, 200);
     const list = await call('/suppliers?search=Regression&category=General&page=1&limit=6', 'GET', undefined, tokenA);
     assert.equal(list.data.totalItems, 1);
     expectStatus(await call(`/suppliers/${supplier._id}`, 'GET', undefined, tokenA), 200);

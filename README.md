@@ -61,7 +61,7 @@ Create `backend/.env` based on `backend/.env.example`. Set `PORT` (normally `500
 npm run dev
 ```
 
-For normal server startup without the development watcher, use `npm start`. Uploaded supplier and quotation images are stored locally in `backend/uploads/` and are not included in Git.
+For normal server startup without the development watcher, use `npm start`. Development uploads use local storage. Production uses MongoDB GridFS so files survive backend restarts, and every download requires the owning user's JWT. Existing local uploads are never automatically migrated or deleted.
 
 ### Frontend
 
@@ -80,7 +80,7 @@ npm run dev
 
 The normal frontend URL is `http://localhost:5173`; use the URL printed by Vite if that port is occupied.
 
-Build the frontend with `npm run build`, or preview the production build with `npm run preview`.
+Build the frontend with `npm run build`, or preview the production build with `npm run preview`. Production builds require `VITE_SERVER` to be the public HTTPS backend base URL ending in `/api`; localhost builds are rejected. See [DEPLOYMENT.md](DEPLOYMENT.md) for hosting and verification.
 
 ## Testing
 

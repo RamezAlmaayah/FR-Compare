@@ -36,6 +36,10 @@ const RegisterPage = () => {
       return 'Passwords do not match.';
     }
 
+    if (form.password.length < 12 || new TextEncoder().encode(form.password).length > 72) {
+      return 'Use a password of at least 12 characters and at most 72 bytes.';
+    }
+
     return '';
   };
 

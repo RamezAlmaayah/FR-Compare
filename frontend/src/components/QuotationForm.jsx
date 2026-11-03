@@ -2,7 +2,7 @@ import { useState } from 'react';
 import FormField from './FormField';
 import QuotationTotals from './QuotationTotals';
 import quotationPreview from '../utils/quotationPreview';
-import { getImageUrl } from '../api/apiConfig';
+import PrivateImage from './PrivateImage';
 
 const validNumber = (value) => value !== '' && Number.isFinite(Number(value)) && Number(value) >= 0;
 
@@ -92,7 +92,7 @@ const QuotationForm = ({ rfq, suppliers, quotation, saving, error, onSubmit }) =
       </div>
       <QuotationTotals {...preview} additionalCost={form.additionalCost} discount={form.discount} />
       <FormField id="quotationNotes" label="Notes" type="textarea" value={form.notes} onChange={changeField('notes')} />
-      {quotation?.image && <img src={getImageUrl(quotation.image)} alt="Current quotation" className="supplier-detail-image mb-3" />}
+      {quotation?.image && <PrivateImage imagePath={quotation.image} alt="Current quotation" className="supplier-detail-image mb-3" />}
       <div className="mb-3">
         <label className="form-label" htmlFor="quotationImage">Quotation Image</label>
         <input id="quotationImage" className="form-control" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png"

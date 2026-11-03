@@ -145,7 +145,7 @@ try {
   for (const extension of ['jpg', 'jpeg', 'png']) await test(`Upload ${extension}`, async () => {
     const result = await uploadQuotation(quoteData(), tokenA, extension);
     expectStatus(result, 201); assert.ok(await fileExists(result.data.quotation.image));
-    assert.equal((await fetch(`${api.replace('/api', '')}${result.data.quotation.image}`)).status, 200);
+    assert.equal((await fetch(`${api.replace('/api', '')}${result.data.quotation.image}`, { headers: { Authorization: `Bearer ${tokenA}` } })).status, 200);
     expectStatus(await call(`/quotations/${result.data.quotation._id}`, 'DELETE', undefined, tokenA), 200);
     assert.equal(await fileExists(result.data.quotation.image), false);
   });

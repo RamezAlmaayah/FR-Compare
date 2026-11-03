@@ -6,23 +6,27 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon server.js",
+    "dev": "node --watch server.js",
     "start": "node server.js",
     "test:phase4": "node tests/phase4.test.js",
     "test:phase5": "node tests/phase5.test.js",
     "test:phase6": "node tests/phase6.test.js",
-    "test:phase7": "node tests/phase7.test.js"
+    "test:phase7": "node tests/phase7.test.js",
+    "test": "node --test tests/production.test.js",
+    "test:regression": "node scripts/verify-local.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.7.3",
+    "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.10.1",
-    "multer": "^2.4.0"
+    "multer": "^2.5.0"
   },
-  "devDependencies": {
-    "nodemon": "^3.1.14"
+  "engines": {
+    "node": ">=24 <25"
   }
 }

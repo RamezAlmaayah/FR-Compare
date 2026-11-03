@@ -1,0 +1,28 @@
+# No paid service or disk is selected. Free instances sleep and have usage limits.
+services:
+  - type: web
+    name: fr-compare-api
+    runtime: node
+    plan: free
+    repo: https://github.com/RamezAlmaayah/FR-Compare
+    branch: main
+    rootDir: backend
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: NODE_ENV
+        value: production
+      - key: CORS_ORIGINS
+        value: https://frcompare.netlify.app
+      - key: UPLOAD_STORAGE
+        value: gridfs
+      - key: TRUST_PROXY_HOPS
+        value: 1
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MONGO_URI
+        sync: false

@@ -48,6 +48,12 @@ const AuthProvider = ({ children }) => {
     };
   }, []);
 
+  useEffect(() => {
+    const expireSession = () => { setToken(null); setUser(null); };
+    window.addEventListener('auth:expired', expireSession);
+    return () => window.removeEventListener('auth:expired', expireSession);
+  }, []);
+
   const login = async (credentials) => {
     const response = await apiClient.post('/auth/login', credentials);
 

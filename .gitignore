@@ -20,6 +20,7 @@ npm-debug.log*
 Thumbs.db
 .vscode/
 .idea/
+.netlify/
 
 # Local backups and temporary verification artifacts
 /backend.zip
@@ -37,3 +38,6 @@ playwright-report/
 # User uploads are local data, not repository assets
 /backend/uploads/*
 !/backend/uploads/.gitkeep
+
+# Local Netlify folder
+.netlify

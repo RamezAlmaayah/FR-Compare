@@ -19,7 +19,7 @@ const createToken = (userId) => {
     throw new Error('JWT_SECRET is not configured.');
   }
 
-  return jwt.sign({ userId }, jwtSecret, { expiresIn: TOKEN_LIFETIME });
+  return jwt.sign({ userId }, jwtSecret, { expiresIn: TOKEN_LIFETIME, algorithm: 'HS256' });
 };
 
 const registerUser = async (request, response) => {
@@ -37,6 +37,10 @@ const registerUser = async (request, response) => {
   }
 
   const normalizedEmail = normalizeEmail(email);
+
+  if (name.trim().length > 120 || email.length > 254 || password.length < 12 || Buffer.byteLength(password) > 72) {
+    return response.status(400).json({ error: 'Use a name up to 120 characters, a valid email, and a password of at least 12 characters and at most 72 bytes' });
+  }
 
   if (!EMAIL_PATTERN.test(normalizedEmail)) {
     return response.status(400).json({ error: 'Enter a valid email address' });
@@ -81,6 +85,10 @@ const loginUser = async (request, response) => {
   }
 
   const normalizedEmail = normalizeEmail(email);
+
+  if (email.length > 254 || Buffer.byteLength(password) > 72) {
+    return response.status(401).json({ error: 'Invalid email or password' });
+  }
 
   if (!EMAIL_PATTERN.test(normalizedEmail)) {
     return response.status(400).json({ error: 'Enter a valid email address' });

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import apiClient from '../api/apiClient';
-import { getImageUrl } from '../api/apiConfig';
+import PrivateImage from '../components/PrivateImage';
 import DeleteConfirmation from '../components/DeleteConfirmation';
 import QuotationTotals from '../components/QuotationTotals';
 import useRecord from '../hooks/useRecord';
@@ -52,7 +52,7 @@ const QuotationDetailsPage = () => {
           <td>{item.unitPrice}</td><td>{item.lineTotal}</td><td>{item.notes || '—'}</td></tr>)}</tbody>
       </table></div>
       <QuotationTotals {...quotation} />
-      {quotation.image && <img src={getImageUrl(quotation.image)} alt="Supplier quotation" className="supplier-detail-image" />}
+      {quotation.image && <PrivateImage imagePath={quotation.image} alt="Supplier quotation" className="supplier-detail-image" />}
     </main>
   );
 };

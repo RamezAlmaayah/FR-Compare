@@ -16,13 +16,21 @@ import RFQDetailsPage from './pages/RFQDetailsPage';
 import QuotationFormPage from './pages/QuotationFormPage';
 import QuotationDetailsPage from './pages/QuotationDetailsPage';
 import CompareQuotationsPage from './pages/CompareQuotationsPage';
+import { useAuth } from './context/AuthContext';
+
+const HomeRedirect = () => {
+  const { isAuthenticated, isAuthLoading } = useAuth();
+  if (isAuthLoading) return <p className="container py-5" role="status">Restoring session...</p>;
+  return <Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />;
+};
 
 const App = () => (
   <Routes>
-    <Route path="/" element={<ConnectionTestPage />} />
+    <Route path="/" element={<HomeRedirect />} />
     <Route path="/login" element={<LoginPage />} />
     <Route path="/register" element={<RegisterPage />} />
     <Route element={<ProtectedRoute />}>
+      <Route path="/diagnostics" element={<ConnectionTestPage />} />
       <Route element={<AppShell />}>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/suppliers" element={<SuppliersPage />} />
