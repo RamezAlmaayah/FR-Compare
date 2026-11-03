@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import testApi from './testTarget.js';
 import User from '../models/User.js';
 import Supplier from '../models/Supplier.js';
 import Item from '../models/Item.js';
@@ -9,7 +10,7 @@ import RFQ from '../models/RFQ.js';
 import Quotation from '../models/Quotation.js';
 
 dotenv.config({ quiet: true });
-const api = `http://127.0.0.1:${process.env.PORT || 5000}/api`;
+const api = testApi();
 const emails = ['a', 'b'].map((suffix) => `phase7-${suffix}-${randomUUID()}@example.com`);
 const password = randomUUID();
 let passed = 0;

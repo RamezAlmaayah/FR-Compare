@@ -4,6 +4,8 @@ import { access, readFile } from 'node:fs/promises';
 import { basename, join } from 'node:path';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import testApi from './testTarget.js';
+import { storageMode, getBucket } from '../services/uploadStorage.js';
 import User from '../models/User.js';
 import Supplier from '../models/Supplier.js';
 import Item from '../models/Item.js';
@@ -15,7 +17,7 @@ import calculateComparison from '../utils/comparisonCalculations.js';
 import { calculateWeightedScores, validateWeights } from '../utils/weightedScore.js';
 
 dotenv.config({ quiet: true });
-const api = `http://127.0.0.1:${process.env.PORT || 5000}/api`;
+const api = testApi();
 const runId = Date.now();
 const emails = [`phase6-a-${runId}@example.com`, `phase6-b-${runId}@example.com`];
 const password = randomUUID();
@@ -229,7 +231,8 @@ try {
   await test('Selected image deletion removes local upload and returns quotation 404', async () => {
     expected(await call(`/quotations/${uploaded._id}`, 'DELETE', undefined, tokenA));
     expected(await call(`/quotations/${uploaded._id}`, 'GET', undefined, tokenA), 404);
-    await assert.rejects(access(join(uploadsDirectory, basename(uploaded.image))), { code: 'ENOENT' });
+    if (storageMode() === 'gridfs') assert.equal(await getBucket().find({ filename: basename(uploaded.image) }).next(), null);
+    else await assert.rejects(access(join(uploadsDirectory, basename(uploaded.image))), { code: 'ENOENT' });
   });
   await test('All decision endpoints require JWT and reject invalid IDs cleanly', async () => {
     for (const path of [`/rfqs/${rfq._id}/comparison`, `/items/${rfq.items[0].itemId}/price-history`]) {

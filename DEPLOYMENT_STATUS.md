@@ -1,6 +1,70 @@
 # FR Compare deployment status ? 3 November 2026
 
-**Overall status: BLOCKED on Render and MongoDB Atlas authorization. The full-stack production deployment is not complete.**
+**Current status: production infrastructure and API verification are complete. Browser acceptance and public visitor access remain pending. This is not yet certified as a public portfolio demo.**
+
+## Production update - 3 November 2026
+
+| Resource | Verified configuration/status |
+| --- | --- |
+| GitHub | https://github.com/RamezAlmaayah/FR-Compare; only this repository receives pushes |
+| Netlify frontend | https://frcompare.netlify.app; existing site ID `9a0728d0-8036-41b0-ad66-37b5e3a20eb0` |
+| Published Netlify deployment | `6aea319e49608432e8aa0714`; ready/published from commit `1cc1d2ca4196e5bfe71efae2a6e61762b3df107c` |
+| Frontend API setting | `VITE_SERVER=https://frcompare-api.onrender.com/api`, re-read from production settings |
+| Render API | https://frcompare-api.onrender.com/api |
+| Health check | https://frcompare-api.onrender.com/api/health; HTTP 200 |
+| Render service | `frcompare-api`, ID `srv-dbl2utbncjis73fms3p0`; Free, Frankfurt, one Node 24 process |
+| Atlas project | `FR-Compare`, ID `6aea2f7288dd0554d8dd35d9` |
+| Atlas cluster/database | `frcompare-production`, M0 Free, AWS Frankfurt; database `frcompare_production` |
+| Database access | Dedicated user with `readWrite` only on the production database and scope limited to this cluster |
+| Permanent network access | Only Render-reported `74.220.51.0/24` and `74.220.59.0/24` |
+| Visitor protection | Still enabled pending browser acceptance |
+
+### Actual production test evidence
+
+| Category | Result | Evidence |
+| --- | --- | --- |
+| Phase 4: authentication, suppliers, catalog, RFQs | PASS | 39 live integration groups |
+| Phase 5: quotation CRUD, calculations, uploads/lifecycle | PASS | 45 live integration groups |
+| Phase 6: comparison, split/weighted scoring, selection, ratings/history | PASS | 67 live integration groups |
+| Phase 7: dashboard and procurement isolation/integration | PASS | 31 live integration groups |
+| Total business integration groups | PASS | All 182 executed against the live Render API and new Atlas database |
+| HTTPS health and database readiness | PASS | HTTP 200; Render startup logs confirm database connectivity and port 10000 |
+| Netlify CORS preflight | PASS | HTTP 204 with exact frontend origin |
+| Unrelated origins | PASS | HTTP 403 |
+| Protected API without JWT | PASS | HTTP 401 |
+| Validly signed but expired JWT | PASS | HTTP 401 |
+| Owner-only GridFS downloads | PASS | Owner gets original bytes; no JWT gets 401; another account gets 404 |
+| Forged image / image above 5 MB | PASS | HTTP 400 / HTTP 413 |
+| GridFS persistence | PASS | Identical image bytes verified after a live Render restart |
+| Required unique indexes | PASS | Users email, per-user item names/RFQ references, and GridFS chunks inspected directly |
+| Netlify production build | PASS | Fresh deployment published using the verified backend URL |
+| Browser registration/login/logout, direct routing and refresh | BLOCKED | Isolated browser waiting for owner Netlify authentication |
+| Desktop/mobile browser layout and menu | BLOCKED | Same browser authentication prerequisite |
+| Anonymous frontend access / public-demo readiness | BLOCKED | Visitor protection intentionally remains enabled |
+
+The live suites use randomized disposable QA accounts and clean up only their own fixtures. The production database was not dropped. The updated test targeting/storage checks also passed all 182 groups locally.
+
+### Infrastructure and repairs
+
+- Both official CLIs are now authorized. A separate Atlas project and free cluster were provisioned; the older `FR Compare` project, paused cluster, roles, data and network rules were left unchanged.
+- Backend build/start commands, health path, main branch and backend root match the repository. Generated database and JWT secrets were stored only in provider settings.
+- No all-IP rule was added to the new project. A temporary single-IP QA rule with a one-hour expiry was added for index verification and must be removed after remaining QA cleanup.
+- Netlify Free rejected explicit environment scopes with HTTP 403. The production API URL was saved using default scopes, re-read, and used for a successful build without any plan upgrade.
+- Tests now support an explicit live opt-in and the exact approved API URL; image checks support GridFS. `render.yaml` matches the provisioned service name and Frankfurt region and passes provider validation.
+- Environment names: Render uses `NODE_ENV`, `NODE_VERSION`, `CORS_ORIGINS`, `UPLOAD_STORAGE`, `TRUST_PROXY_HOPS`, `MONGO_URI`, `JWT_SECRET`, and host-provided `PORT`. Netlify uses public `VITE_SERVER`. No backend secrets are frontend variables.
+
+### Remaining acceptance steps
+
+1. Complete owner Netlify sign-in in the isolated verification browser while protection remains enabled, then execute real desktop/mobile browser workflows.
+2. After acceptance, make only `frcompare` public and verify fresh anonymous sessions, nested routes and protected application redirects.
+3. Remove only newly created QA fixtures and the temporary single-IP Atlas rule.
+4. Record final browser/public-access results and deployment commit IDs here.
+
+Render Free can sleep and incur roughly a minute of cold-start delay. Atlas M0 has 0.5 GB storage and throughput/transfer limits; GridFS shares those quotas. No paid resources, billing enablement, development-data migration or original repository modification was performed.
+
+## Historical record before production provisioning
+
+The sections below describe the earlier implementation and authorization-blocked state. The production update above supersedes their deployment status.
 
 ## Targets and access
 

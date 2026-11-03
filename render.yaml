@@ -1,11 +1,12 @@
 # No paid service or disk is selected. Free instances sleep and have usage limits.
 services:
   - type: web
-    name: fr-compare-api
+    name: frcompare-api
     runtime: node
     plan: free
     repo: https://github.com/RamezAlmaayah/FR-Compare
     branch: main
+    region: frankfurt
     rootDir: backend
     buildCommand: npm ci --omit=dev
     startCommand: npm start

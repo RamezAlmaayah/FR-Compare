@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import testApi from './testTarget.js';
 import Item from '../models/Item.js';
 import RFQ from '../models/RFQ.js';
 import User from '../models/User.js';
@@ -9,7 +10,7 @@ import Supplier from '../models/Supplier.js';
 import deleteUploadedFile from '../utils/fileStorage.js';
 
 dotenv.config({ quiet: true });
-const api = `http://127.0.0.1:${process.env.PORT || 5000}/api`;
+const api = testApi();
 const runId = Date.now();
 const password = randomUUID();
 const emails = [`phase4-a-${runId}@example.com`, `phase4-b-${runId}@example.com`];
@@ -56,7 +57,7 @@ try {
     const result = await call('/test');
     expectStatus(result, 200);
     assert.equal(result.data.message, 'FR Compare API is running');
-    const response = await fetch(`${api}/items`, { method: 'OPTIONS', headers: { Origin: 'http://localhost:5173', 'Access-Control-Request-Method': 'POST' } });
+    const response = await fetch(`${api}/items`, { method: 'OPTIONS', headers: { Origin: process.env.FR_COMPARE_TEST_ORIGIN || 'http://localhost:5173', 'Access-Control-Request-Method': 'POST' } });
     assert.ok(response.headers.get('access-control-allow-origin'));
   });
   await test('Item/RFQ endpoints require authentication', async () => {

@@ -4,6 +4,8 @@ import { access } from 'node:fs/promises';
 import { basename, join } from 'node:path';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import testApi from './testTarget.js';
+import { storageMode, getBucket } from '../services/uploadStorage.js';
 import User from '../models/User.js';
 import Supplier from '../models/Supplier.js';
 import Item from '../models/Item.js';
@@ -13,7 +15,7 @@ import deleteUploadedFile from '../utils/fileStorage.js';
 import { uploadsDirectory } from '../middleware/upload.js';
 
 dotenv.config({ quiet: true });
-const api = `http://127.0.0.1:${process.env.PORT || 5000}/api`;
+const api = testApi();
 const runId = Date.now();
 const emails = [`phase5-a-${runId}@example.com`, `phase5-b-${runId}@example.com`];
 const password = randomUUID();
@@ -32,6 +34,10 @@ const expectStatus = (result, status) => assert.equal(result.status, status, JSO
 const rfqEditData = (rfq) => ({ ...rfq, requestDate: rfq.requestDate.slice(0, 10), requiredByDate: rfq.requiredByDate?.slice(0, 10) || '' });
 const test = async (name, action) => { await action(); completed += 1; process.stdout.write(`PASS — ${name}\n`); };
 const fileExists = async (image) => {
+  if (storageMode() === 'gridfs') {
+    if (mongoose.connection.readyState !== 1) await mongoose.connect(process.env.MONGO_URI);
+    return Boolean(await getBucket().find({ filename: basename(image) }).next());
+  }
   try { await access(join(uploadsDirectory, basename(image))); return true; }
   catch (error) { if (error.code === 'ENOENT') return false; throw error; }
 };

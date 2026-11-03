@@ -4,7 +4,21 @@ Source repository: https://github.com/RamezAlmaayah/FR-Compare
 
 Frontend target: https://frcompare.netlify.app
 
-The backend's public URL is assigned by its host and must be verified before configuring Netlify. Do not use the Vercel reference, a localhost URL, or the reserved compilation-test URL as the production API without a successful health and authentication check.
+Backend API: https://frcompare-api.onrender.com/api
+
+Health check: https://frcompare-api.onrender.com/api/health
+
+The backend health, authentication, business APIs, and Atlas connection have been verified live. Netlify has published a successful build with this API URL. Visitor protection remains enabled while browser acceptance checks are completed; do not claim public portfolio readiness until anonymous access and browser workflows pass.
+
+## Provisioned resources
+
+- Render workspace: Planora's workspace; service `frcompare-api`, ID `srv-dbl2utbncjis73fms3p0`, Free plan, Frankfurt, one instance.
+- Atlas project: `FR-Compare`, ID `6aea2f7288dd0554d8dd35d9`; cluster `frcompare-production`, M0, AWS Frankfurt.
+- Database: `frcompare_production`. The application user has only `readWrite` on this database and is scoped to this cluster.
+- Atlas permanent access list: `74.220.51.0/24` and `74.220.59.0/24`, retrieved from this Render service's outbound-IP API. No all-IP rule was added to this project.
+- The older Atlas project named `FR Compare` and its paused cluster, users, data, and network rules were left untouched.
+- Netlify project ID: `9a0728d0-8036-41b0-ad66-37b5e3a20eb0`. Do not create another site or apply a new Blueprint that duplicates the existing Render service; update these resource IDs.
+- Generated database and JWT secrets live in provider settings. They are not included in repository files or deployment reports.
 
 ## Audited production blockers and repairs
 
@@ -47,7 +61,7 @@ Current provider references: [Free limitations](https://render.com/docs/free), [
 ## Dedicated MongoDB production database
 
 1. Use an authorized Atlas project and select a suitable deployment only after confirming the current price and limits. Do not reuse development data.
-2. Create a database user limited to `readWrite` on a dedicated database, such as `fr_compare_production`. Use the driver's `mongodb+srv://` URI with that database name and normal TLS certificate verification.
+2. Create a database user limited to `readWrite` on the dedicated `frcompare_production` database. Use the driver's SRV connection format with that database name and normal TLS certificate verification.
 3. From the Render service's **Connect > Outbound** tab, copy its actual outbound CIDR ranges and add only those ranges to Atlas Network Access. They are shared regional ranges, not exclusive addresses. Do not add `0.0.0.0/0` without explicit approval.
 4. Store the URI in Render's `MONGO_URI` secret. Do not commit it or reuse local `.env` contents.
 5. Verify health returns HTTP 200 and `{"status":"ok"}`. Check declared unique indexes on `users.email`, `items(userId, normalizedName)`, and `rfqs(userId, referenceNumber)`, and GridFS indexes after the first upload. Existing indexes are not dropped or synchronized destructively.
@@ -59,6 +73,8 @@ Current provider references: [Free limitations](https://render.com/docs/free), [
 2. Confirm the selected project is `frcompare` in the intended account. Link only that project if using CLI; do not create or rename another site.
 3. In **Project configuration > Build & deploy > Continuous deployment**, link `RamezAlmaayah/FR-Compare`, production branch `main`. Root `netlify.toml` sets base `frontend`, command `npm ci && npm run build`, publish `dist`, Node 24. Check UI overrides and existing redirect rules for conflicts.
 4. In **Project configuration > Environment variables**, set `VITE_SERVER` to the verified backend URL plus `/api`, with production/build scope. It is public configuration, never a secret. Trigger a fresh production build.
+
+   On the current Free plan, omit explicit environment `scopes` when using the API: setting specific scopes returns HTTP 403 and requires an upgrade. The production-context value is public configuration and can use the plan's default scopes. Always re-read the setting after writing; a zero CLI exit code alone did not prove it was saved during this deployment.
 5. Confirm `dist/_redirects` exists, and no existing forced redirect intercepts application paths. The single SPA fallback is in `_redirects`, not duplicated in `netlify.toml`.
 6. Test the protected deployment before opening it to public visitors. On credit-based plans, go to **Project configuration > General > Visitor access > Project visibility > Edit visibility**, select **Public**, and save. On legacy plans, use **Project configuration > General > Visitor access > Password Protection** to remove the protection. If team policy enforces protection, an authorized team owner must change it. Confirm anonymous behavior using the actual URL.
 7. Verify anonymous access with a separate browser session and unauthenticated HTTP requests. Do not disable application JWT protections.
@@ -75,6 +91,8 @@ Install backend and frontend dependencies with `npm ci` in each folder.
 - Frontend: set `VITE_SERVER` to the verified backend `/api` URL and run `npm run build`. Confirm `dist/_redirects` contents.
 - Run `npm audit --omit=dev` in each folder. Do not apply forced major upgrades automatically.
 - GitHub Actions performs the same isolated checks against a MongoDB service. Its reserved `https://api.example.invalid/api` URL is for compilation only and must never be deployed.
+
+The Phase 4-7 suites can also target the approved live API with `FR_COMPARE_TEST_API=https://frcompare-api.onrender.com/api`, `FR_COMPARE_TEST_LIVE=yes`, `FR_COMPARE_TEST_ORIGIN=https://frcompare.netlify.app`, `UPLOAD_STORAGE=gridfs`, and server/database secrets supplied securely through the process environment. They were executed live and passed all 182 groups. They create randomized QA accounts and clean up only those accounts' fixtures; they do not drop the production database. Never substitute a different API target or reuse the local database-dropping test harness in production. Temporary single-IP verification access must expire or be removed after inspection.
 
 ## Live acceptance record
 

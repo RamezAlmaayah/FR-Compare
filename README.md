@@ -2,6 +2,12 @@
 
 Supplier Quotation Management and Comparison System
 
+Frontend: https://frcompare.netlify.app (visitor protection remains enabled pending browser acceptance).
+
+Backend API: https://frcompare-api.onrender.com/api
+
+See [deployment status](DEPLOYMENT_STATUS.md) for verified live results and remaining acceptance checks.
+
 FR Compare is a MERN full-stack procurement application for managing suppliers, catalog items, RFQs, quotations, quotation comparison, purchasing decisions, supplier ratings, and historical prices.
 
 ## Features
