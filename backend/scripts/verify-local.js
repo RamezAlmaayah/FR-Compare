@@ -23,9 +23,11 @@ try {
     if (code !== 0) throw new Error(`Phase ${phase} failed`);
   }
 } finally {
-  if (server) await stopBackend(server.child);
-  await mongoose.connect(environment.MONGO_URI);
-  if (!mongoose.connection.name.startsWith('fr_compare_regression_test_')) throw new Error('Refusing cleanup of a non-test database');
-  await mongoose.connection.dropDatabase();
+  if (server) {
+    await stopBackend(server.child);
+    await mongoose.connect(environment.MONGO_URI, { serverSelectionTimeoutMS: 3000 });
+    if (!mongoose.connection.name.startsWith('fr_compare_regression_test_')) throw new Error('Refusing cleanup of a non-test database');
+    await mongoose.connection.dropDatabase();
+  }
   await mongoose.disconnect();
 }

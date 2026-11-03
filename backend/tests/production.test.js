@@ -147,10 +147,12 @@ test('production HTTP, authentication, ownership, validation, and durable upload
       assert.equal(response.status, 429); assert.ok((await response.json()).error.includes('Too many'));
     });
   } finally {
-    if (server) await stopBackend(server.child);
-    if (mongoose.connection.readyState !== 1) await mongoose.connect(env.MONGO_URI);
-    assert.ok(mongoose.connection.name.startsWith('fr_compare_production_test_'));
-    await mongoose.connection.dropDatabase();
+    if (server) {
+      await stopBackend(server.child);
+      if (mongoose.connection.readyState !== 1) await mongoose.connect(env.MONGO_URI, { serverSelectionTimeoutMS: 3000 });
+      assert.ok(mongoose.connection.name.startsWith('fr_compare_production_test_'));
+      await mongoose.connection.dropDatabase();
+    }
     await mongoose.disconnect();
   }
 });

@@ -9,11 +9,18 @@ permissions:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    # MongoDB 8's allocator rejects newer runner kernels (SERVER-121912).
+    runs-on: ubuntu-22.04
     services:
       mongodb:
         image: mongo:8
         ports: ["27017:27017"]
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ ping: 1 })'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+          --health-start-period 10s
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
