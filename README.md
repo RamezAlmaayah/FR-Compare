@@ -2,7 +2,7 @@
 
 Supplier Quotation Management and Comparison System
 
-Frontend: https://frcompare.netlify.app (visitor protection remains enabled pending browser acceptance).
+Frontend: https://frcompare.netlify.app (visitor protection remains enabled pending final anonymous-access verification).
 
 Backend API: https://frcompare-api.onrender.com/api
 

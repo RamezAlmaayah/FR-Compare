@@ -8,7 +8,7 @@ Backend API: https://frcompare-api.onrender.com/api
 
 Health check: https://frcompare-api.onrender.com/api/health
 
-The backend health, authentication, business APIs, and Atlas connection have been verified live. Netlify has published a successful build with this API URL. Visitor protection remains enabled while browser acceptance checks are completed; do not claim public portfolio readiness until anonymous access and browser workflows pass.
+The backend health, authentication, business APIs, Atlas connection, and 18 protected-browser checks have been verified live. Netlify has published a successful build with this API URL. Visitor protection remains enabled pending final anonymous-access verification; do not claim public portfolio readiness until those remaining checks pass.
 
 ## Provisioned resources
 
@@ -19,6 +19,7 @@ The backend health, authentication, business APIs, and Atlas connection have bee
 - The older Atlas project named `FR Compare` and its paused cluster, users, data, and network rules were left untouched.
 - Netlify project ID: `9a0728d0-8036-41b0-ad66-37b5e3a20eb0`. Do not create another site or apply a new Blueprint that duplicates the existing Render service; update these resource IDs.
 - Generated database and JWT secrets live in provider settings. They are not included in repository files or deployment reports.
+- The service was initially created from its public repository URL. Render requires a connected Git provider for automatic deployments; the configured auto-deploy flag alone does not establish that connection. Until the owner connects the intended GitHub account under Render Account Settings > Git Deployment Credentials, deploy an approved commit with the authenticated CLI. The latest completion commit is deployed manually after successful CI. See [Render deployment behavior](https://render.com/docs/deploys).
 
 ## Audited production blockers and repairs
 
